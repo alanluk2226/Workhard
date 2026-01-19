@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            
+            <!-- Desktop Navigation -->
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/create" class="nav-link">Create Workout</a>
+                <a href="/courses" class="nav-link">Courses</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                <% } %>
+            </div>
+
+            <!-- Mobile Navigation Toggle -->
+            <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+        </nav>
+
+        <!-- Mobile Navigation Overlay -->
+        <div class="mobile-nav-overlay" id="mobileNavOverlay">
+            <div class="mobile-nav-menu">
+                <a href="/" class="mobile-nav-link">🏠 Home</a>
+                <a href="/create" class="mobile-nav-link">➕ Create Workout</a>
+                <a href="/read" class="mobile-nav-link active">📊 My Workouts</a>
+                <a href="/courses" class="mobile-nav-link">🎓 Courses</a>
+                <% if (user) { %>
+                    <div class="mobile-user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="mobile-nav-link btn btn-danger">🚪 Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="mobile-nav-link">🔑 Login</a>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">My Workouts 📊</h1>
+                <p>View and search your workout history</p>
+            </div>
+
+            <!-- 搜索和篩選 -->
+            <div style="margin-bottom: 2rem;">
+                <div class="search-filter-grid" style="display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: end;">
+                    <div class="form-group">
+                        <label class="form-label" for="searchExercise">Search Exercise</label>
+                        <input type="text" class="form-control" id="searchExercise" 
+                               placeholder="Type to search exercises...">
+                        <div id="searchSuggestions" class="autocomplete-items"></div>
+                    </div>
+                    
+                    <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+                        <div class="form-group">
+                            <label class="form-label" for="filterType">Exercise Type</label>
+                            <select class="form-control" id="filterType">
+                                <option value="">All Types</option>
+                                <option value="cardio">Cardio</option>
+                                <option value="strength">Strength</option>
+                                <option value="flexibility">Flexibility</option>
+                                <option value="balance">Balance</option>
+                                <option value="high-intensity-interval-training">HIIT</option>
+                                <option value="sports">Sports</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="filterDate">Date</label>
+                            <input type="date" class="form-control" id="filterDate">
+                        </div>
+
+                        <button class="btn btn-primary" onclick="loadWorkouts()" style="height: fit-content; white-space: nowrap;">
+                            🔍 Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 統計信息 -->
+            <div class="stats-grid" id="workoutStats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalWorkoutsCount">0</div>
+                    <div class="stat-label">Total Workouts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCaloriesCount">0</div>
+                    <div class="stat-label">Total Calories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDurationCount">0</div>
+                    <div class="stat-label">Total Minutes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgIntensity">0</div>
+                    <div class="stat-label">Avg. Intensity</div>
+                </div>
+            </div>
+
+            <!-- 訓練列表 -->
+            <div id="workoutsList">
+                <div style="text-align: center; padding: 2rem;">
+                    <p>Loading your workouts...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allWorkouts = [];
+
+        // 載入訓練數據
+        async function loadWorkouts() {
+            try {
+                const response = await fetch('/api/workouts');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allWorkouts = data.workouts;
+                    filterAndDisplayWorkouts();
+                }
+            } catch (error) {
+                console.error('Error loading workouts:', error);
+                document.getElementById('workoutsList').innerHTML = `
+                    <div style="text-align: center; color: red;">
+                        Error loading workouts. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // 篩選和顯示訓練
+        function filterAndDisplayWorkouts() {
+            const searchTerm = document.getElementById('searchExercise').value.toLowerCase();
+            const filterType = document.getElementById('filterType').value;
+            const filterDate = document.getElementById('filterDate').value;
+
+            let filteredWorkouts = allWorkouts.filter(workout => {
+                const matchesSearch = !searchTerm || 
+                    workout.exerciseName.toLowerCase().includes(searchTerm);
+                const matchesType = !filterType || workout.exerciseType === filterType;
+                const matchesDate = !filterDate || 
+                    workout.date.split('T')[0] === filterDate;
+                
+                return matchesSearch && matchesType && matchesDate;
+            });
+
+            displayWorkouts(filteredWorkouts);
+            updateStats(filteredWorkouts);
+        }
+
+        // 顯示訓練列表
+        function displayWorkouts(workouts) {
+            const container = document.getElementById('workoutsList');
+            
+            if (workouts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <h3>No workouts found</h3>
+                        <p>Try adjusting your search criteria or <a href="/create">create a new workout</a></p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = workouts.map((workout, index) => `
+                <div class="workout-card fade-in" id="workout-${workout._id}">
+                    <div class="workout-header">
+                        <div class="workout-title">${workout.exerciseName}</div>
+                        <div class="workout-actions">
+                            <a href="/update?id=${workout._id}" class="btn btn-primary" style="padding: 0.5rem 1rem;">
+                                Edit
+                            </a>
+                            <button onclick="deleteWorkout('${workout._id}')" class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Timer Section -->
+                    <div class="timer-section" style="text-align: center; margin: 1rem 0; padding: 1.5rem; background: rgba(0, 255, 127, 0.05); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: 8px;">
+                        <div class="timer-display" id="timer-display-${workout._id}" style="font-size: 2rem; font-weight: bold; color: var(--color-neon-green); margin-bottom: 1rem;">
+                            ${Math.floor(workout.duration)}:00
+                        </div>
+                        <div class="timer-controls" style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <button onclick="startTimer('${workout._id}', ${workout.duration})" id="start-btn-${workout._id}" class="btn btn-success" style="padding: 0.5rem 1rem;">
+                                ▶️ Start
+                            </button>
+                            <button onclick="pauseTimer('${workout._id}')" id="pause-btn-${workout._id}" class="btn btn-secondary" style="padding: 0.5rem 1rem; display: none;">
+                                ⏸️ Pause
+                            </button>
+                            <button onclick="resetTimer('${workout._id}', ${workout.duration})" id="reset-btn-${workout._id}" class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                                🔄 Reset
+                            </button>
+                        </div>
+                        <div id="timer-status-${workout._id}" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--color-text-light);">
+                            Ready to start
+                        </div>
+                    </div>
+                    
+                    <div class="workout-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span>${workout.exerciseType}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span>${new Date(workout.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span>${workout.duration} mins</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Calories</span>
+                            <span>${workout.caloriesBurned}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Intensity</span>
+                            <span style="text-transform: capitalize;">${workout.intensity}</span>
+                        </div>
+                        ${workout.sets ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Sets/Reps</span>
+                            <span>${workout.sets} x ${workout.reps}</span>
+                        </div>
+                        ` : ''}
+                        ${workout.distance ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Distance</span>
+                            <span>${workout.distance} ${workout.distanceUnit}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${workout.notes ? `
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                        <strong>Notes:</strong> ${workout.notes}
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 更新統計信息
+        function updateStats(workouts) {
+            const totalWorkouts = workouts.length;
+            const totalCalories = workouts.reduce((sum, w) => sum + w.caloriesBurned, 0);
+            const totalDuration = workouts.reduce((sum, w) => sum + w.duration, 0);
+            
+            document.getElementById('totalWorkoutsCount').textContent = totalWorkouts;
+            document.getElementById('totalCaloriesCount').textContent = totalCalories;
+            document.getElementById('totalDurationCount').textContent = totalDuration;
+        }
+
+        // 刪除訓練
+        async function deleteWorkout(workoutId) {
+            if (!confirm('Are you sure you want to delete this workout?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/workouts/${workoutId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Workout deleted successfully!');
+                    loadWorkouts(); // 重新載入列表
+                } else {
+                    alert('Error deleting workout: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting workout:', error);
+                alert('Error deleting workout. Please try again.');
+            }
+        }
+
+        // 自動完成功能
+        document.getElementById('searchExercise').addEventListener('input', function(e) {
+            const input = e.target.value.toLowerCase();
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            suggestionsContainer.innerHTML = '';
+
+            if (input.length > 0 && allWorkouts.length > 0) {
+                const exerciseNames = [...new Set(allWorkouts.map(w => w.exerciseName))];
+                const filtered = exerciseNames.filter(name => 
+                    name.toLowerCase().includes(input)
+                ).slice(0, 5);
+
+                filtered.forEach(name => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.textContent = name;
+                    div.addEventListener('click', () => {
+                        document.getElementById('searchExercise').value = name;
+                        suggestionsContainer.innerHTML = '';
+                        filterAndDisplayWorkouts();
+                    });
+                    suggestionsContainer.appendChild(div);
+                });
+            }
+        });
+
+        // 頁面載入時獲取訓練數據
+        document.addEventListener('DOMContentLoaded', loadWorkouts);
+
+        // 監聽篩選條件變化
+        document.getElementById('filterType').addEventListener('change', filterAndDisplayWorkouts);
+        document.getElementById('filterDate').addEventListener('change', filterAndDisplayWorkouts);
+        document.getElementById('searchExercise').addEventListener('input', filterAndDisplayWorkouts);
+
+        // Timer functionality for workouts
+        const timers = {}; // Store timer states for each workout
+
+        function startTimer(workoutId, duration) {
+            if (timers[workoutId]?.interval) {
+                // Already running
+                return;
+            }
+
+            if (!timers[workoutId]) {
+                timers[workoutId] = {
+                    remaining: duration * 60,
+                    isPaused: false
+                };
+            }
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+            statusDiv.textContent = 'Workout in progress... 💪';
+            statusDiv.style.color = 'var(--color-success)';
+
+            timers[workoutId].interval = setInterval(() => {
+                timers[workoutId].remaining--;
+                updateTimerDisplay(workoutId);
+
+                if (timers[workoutId].remaining <= 0) {
+                    completeTimer(workoutId);
+                }
+            }, 1000);
+        }
+
+        function pauseTimer(workoutId) {
+            if (!timers[workoutId]?.interval) return;
+
+            clearInterval(timers[workoutId].interval);
+            timers[workoutId].interval = null;
+            timers[workoutId].isPaused = true;
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = '▶️ Resume';
+            pauseBtn.style.display = 'none';
+            statusDiv.textContent = 'Timer paused';
+            statusDiv.style.color = 'var(--color-accent)';
+        }
+
+        function resetTimer(workoutId, duration) {
+            if (timers[workoutId]?.interval) {
+                clearInterval(timers[workoutId].interval);
+            }
+
+            timers[workoutId] = {
+                remaining: duration * 60,
+                isPaused: false,
+                interval: null
+            };
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = '▶️ Start';
+            pauseBtn.style.display = 'none';
+            statusDiv.textContent = 'Ready to start';
+            statusDiv.style.color = 'var(--color-text-light)';
+
+            updateTimerDisplay(workoutId);
+        }
+
+        function completeTimer(workoutId) {
+            if (timers[workoutId]?.interval) {
+                clearInterval(timers[workoutId].interval);
+            }
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+            const displayDiv = document.getElementById(`timer-display-${workoutId}`);
+
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = '▶️ Start';
+            pauseBtn.style.display = 'none';
+            statusDiv.textContent = '🎉 Workout Complete!';
+            statusDiv.style.color = 'var(--color-success)';
+            displayDiv.textContent = '00:00';
+
+            // Play a notification sound or show alert
+            alert('🎉 Workout timer completed! Great job!');
+        }
+
+        function updateTimerDisplay(workoutId) {
+            const displayDiv = document.getElementById(`timer-display-${workoutId}`);
+            if (!displayDiv || !timers[workoutId]) return;
+
+            const minutes = Math.floor(timers[workoutId].remaining / 60);
+            const seconds = timers[workoutId].remaining % 60;
+            displayDiv.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    </script>
+
+    <!-- Mobile Navigation JavaScript -->
+    <script>
+        // Mobile Navigation Toggle
+        const mobileNavToggle = document.getElementById('mobileNavToggle');
+        const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+        const hamburger = document.getElementById('hamburger');
+
+        function toggleMobileNav() {
+            const isActive = mobileNavOverlay.classList.contains('active');
+            
+            if (isActive) {
+                // Close mobile nav
+                mobileNavOverlay.classList.remove('active');
+                hamburger.classList.remove('active');
+                document.body.style.overflow = '';
+            } else {
+                // Open mobile nav
+                mobileNavOverlay.classList.add('active');
+                hamburger.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Event listeners
+        mobileNavToggle.addEventListener('click', toggleMobileNav);
+
+        // Close mobile nav when clicking on overlay
+        mobileNavOverlay.addEventListener('click', function(e) {
+            if (e.target === mobileNavOverlay) {
+                toggleMobileNav();
+            }
+        });
+
+        // Close mobile nav when clicking on a link
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                toggleMobileNav();
+            });
+        });
+
+        // Close mobile nav on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNavOverlay.classList.contains('active')) {
+                toggleMobileNav();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 1024 && mobileNavOverlay.classList.contains('active')) {
+                toggleMobileNav();
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
