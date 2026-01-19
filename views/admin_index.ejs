@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-nav {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            border-bottom: 2px solid #00ff7f;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-nav .nav-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        
+        .admin-nav-item {
+            color: #00ff7f;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            background: rgba(0, 255, 127, 0.1);
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .admin-nav-item:hover {
+            background: rgba(0, 255, 127, 0.2);
+            border-color: #00ff7f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+        }
+        
+        .admin-nav-item.active {
+            background: #00ff7f;
+            color: #000;
+        }
+        
+        .admin-content {
+            display: none;
+        }
+        
+        .admin-content.active {
+            display: block;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.1);
+        }
+        
+        .admin-table th,
+        .admin-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 127, 0.2);
+        }
+        
+        .admin-table th {
+            background: rgba(0, 255, 127, 0.1);
+            color: #00ff7f;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .admin-table tr:hover {
+            background: rgba(0, 255, 127, 0.05);
+        }
+        
+        .admin-btn {
+            padding: 0.5rem 1rem;
+            margin: 0.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-btn-edit {
+            background: #f39c12;
+            color: #fff;
+        }
+        
+        .admin-btn-edit:hover {
+            background: #e67e22;
+            transform: translateY(-1px);
+        }
+        
+        .admin-btn-delete {
+            background: #e74c3c;
+            color: #fff;
+        }
+        
+        .admin-btn-delete:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+        
+        .admin-btn-create {
+            background: #00ff7f;
+            color: #000;
+            padding: 1rem 2rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .admin-btn-create:hover {
+            background: #00cc66;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+        }
+        
+        .admin-form {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .admin-form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .admin-form-label {
+            display: block;
+            color: #00ff7f;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .admin-form-input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .admin-form-input:focus {
+            outline: none;
+            border-color: #00ff7f;
+            box-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
+        }
+        
+        /* Fix dropdown readability */
+        .admin-form-input select,
+        select.admin-form-input {
+            background: #2d2d2d !important;
+            color: #fff !important;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ff7f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+        }
+        
+        .admin-form-input option {
+            background: #2d2d2d !important;
+            color: #fff !important;
+            padding: 0.5rem;
+        }
+        
+        .admin-form-input option:hover,
+        .admin-form-input option:focus,
+        .admin-form-input option:checked {
+            background: rgba(0, 255, 127, 0.2) !important;
+            color: #fff !important;
+        }
+        
+        /* Ensure selected option is visible */
+        .admin-form-input select:focus {
+            outline: none;
+            border-color: #00ff7f;
+            box-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
+        }
+        
+        /* Schedule container styles */
+        .schedule-container {
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(0, 255, 127, 0.05);
+        }
+        
+        .schedule-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .schedule-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .remove-schedule-btn {
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            height: fit-content;
+        }
+        
+        .remove-schedule-btn:hover {
+            background: #c0392b;
+        }
+        
+        .add-schedule-btn {
+            background: rgba(0, 255, 127, 0.2);
+            color: #00ff7f;
+            border: 1px solid rgba(0, 255, 127, 0.5);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .add-schedule-btn:hover {
+            background: rgba(0, 255, 127, 0.3);
+        }
+        
+        /* File upload styles */
+        .file-upload-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 0.8rem;
+            background: rgba(0, 255, 127, 0.1);
+            border: 2px dashed rgba(0, 255, 127, 0.3);
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #00ff7f;
+        }
+        
+        .file-upload-label:hover {
+            background: rgba(0, 255, 127, 0.2);
+            border-color: #00ff7f;
+        }
+        
+        .file-upload-label.dragover {
+            background: rgba(0, 255, 127, 0.3);
+            border-color: #00ff7f;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 1rem;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+        }
+        
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .remove-image-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        /* Modal styles - fixed scrollbar issue */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            margin: 2% auto;
+            padding: 2rem;
+            border: 1px solid #00ff7f;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            max-height: none; /* Remove height restriction */
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            z-index: 1001;
+        }
+        
+        .close:hover {
+            color: #00ff7f;
+        }
+        
+        /* Modal form buttons */
+        .modal-form-buttons {
+            padding: 1rem 0;
+            margin-top: 1rem;
+            border-top: 1px solid rgba(0, 255, 127, 0.2);
+        }
+        
+        .modal-content .admin-btn {
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        
+        /* Responsive modal */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 1% auto;
+                padding: 1rem;
+            }
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-stat-card {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #00ff7f;
+            text-align: center;
+        }
+        
+        .admin-stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ff7f;
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-stat-label {
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            overflow-y: auto; /* Allow vertical scrolling */
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            margin: 2% auto;
+            padding: 2rem;
+            border: 1px solid #00ff7f;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            max-height: 90vh; /* Limit height to 90% of viewport */
+            overflow-y: auto; /* Make content scrollable */
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            z-index: 1001;
+        }
+        
+        .close:hover {
+            color: #00ff7f;
+        }
+        
+        /* Ensure form content is scrollable */
+        .modal-content form {
+            margin-top: 2rem;
+            max-height: calc(90vh - 4rem);
+            overflow-y: auto;
+        }
+        
+        /* Fix button positioning in modals */
+        .modal-content .admin-btn {
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        
+        /* Ensure buttons are always visible at bottom */
+        .modal-form-buttons {
+            position: sticky;
+            bottom: 0;
+            background: #1a1a1a;
+            padding: 1rem 0;
+            margin-top: 1rem;
+            border-top: 1px solid rgba(0, 255, 127, 0.2);
+        }
+        
+        /* Responsive modal for smaller screens */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 1% auto;
+                padding: 1rem;
+                max-height: 95vh;
+            }
+            
+            .modal-content form {
+                max-height: calc(95vh - 2rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Admin Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">🔧 Admin Panel</div>
+            <div class="nav-links">
+                <div class="user-info">
+                    <span>Admin: <%= user.username %></span>
+                    <a href="/logout" class="btn btn-danger">Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Admin Navigation Menu -->
+        <div class="admin-nav">
+            <div class="nav-links">
+                <a href="#" class="admin-nav-item active" onclick="showSection('courses')">Courses</a>
+                <a href="#" class="admin-nav-item" onclick="showSection('coaches')">Coaches</a>
+                <a href="#" class="admin-nav-item" onclick="showSection('users')">Users</a>
+                <a href="#" class="admin-nav-item" onclick="showSection('promotions')">Promotions</a>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard Stats -->
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <div class="admin-stat-number" id="totalCoursesCount">0</div>
+                <div class="admin-stat-label">Total Courses</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-number" id="totalCoachesCount">0</div>
+                <div class="admin-stat-label">Total Coaches</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-number" id="totalUsersCount">0</div>
+                <div class="admin-stat-label">Total Users</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-number" id="totalEnrollmentsCount">0</div>
+                <div class="admin-stat-label">Total Enrollments</div>
+            </div>
+        </div>
+
+        <!-- Courses Management -->
+        <div id="courses-section" class="admin-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Courses Management</h2>
+                    <button class="admin-btn admin-btn-create" onclick="showCreateCourseForm()">Create New Course</button>
+                </div>
+                
+                <div id="create-course-form" style="display: none;">
+                    <div class="admin-form">
+                        <h3>Create New Course</h3>
+                        <form id="courseForm">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Course Name</label>
+                                <input type="text" class="admin-form-input" id="courseName" required>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Course Type</label>
+                                <select class="admin-form-input" id="courseType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="yoga">Yoga</option>
+                                    <option value="hiit">HIIT</option>
+                                    <option value="pilates">Pilates</option>
+                                    <option value="zumba">Zumba</option>
+                                    <option value="bodyweight">Bodyweight</option>
+                                    <option value="cardio">Cardio</option>
+                                    <option value="circuittraining">Circuit Training</option>
+                                    <option value="cardiokickboxing">Cardio Kickboxing</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Description</label>
+                                <textarea class="admin-form-input" id="courseDescription" rows="3"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Coach</label>
+                                <select class="admin-form-input" id="courseCoach" required>
+                                    <option value="">Select Coach</option>
+                                </select>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Course Schedules</label>
+                                <div id="schedules-container" class="schedule-container">
+                                    <div class="schedule-item" data-schedule-index="0">
+                                        <div>
+                                            <label class="admin-form-label">Day</label>
+                                            <select class="admin-form-input schedule-day" required>
+                                                <option value="">Select Day</option>
+                                                <option value="Monday">Monday</option>
+                                                <option value="Tuesday">Tuesday</option>
+                                                <option value="Wednesday">Wednesday</option>
+                                                <option value="Thursday">Thursday</option>
+                                                <option value="Friday">Friday</option>
+                                                <option value="Saturday">Saturday</option>
+                                                <option value="Sunday">Sunday</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="admin-form-label">Start Time</label>
+                                            <input type="time" class="admin-form-input schedule-start-time" required>
+                                        </div>
+                                        <div>
+                                            <label class="admin-form-label">End Time</label>
+                                            <input type="time" class="admin-form-input schedule-end-time" required>
+                                        </div>
+                                        <button type="button" class="remove-schedule-btn" onclick="removeSchedule(0)" style="display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="add-schedule-btn" onclick="addSchedule()">+ Add Another Schedule</button>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Max Participants</label>
+                                <input type="number" class="admin-form-input" id="maxParticipants" min="1" required>
+                            </div>
+                            <button type="submit" class="admin-btn admin-btn-create">Create Course</button>
+                            <button type="button" class="admin-btn admin-btn-delete" onclick="hideCreateCourseForm()">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Coach</th>
+                            <th>Schedule</th>
+                            <th>Participants</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="courses-table-body">
+                        <!-- Courses will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Coaches Management -->
+        <div id="coaches-section" class="admin-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Coaches Management</h2>
+                    <button class="admin-btn admin-btn-create" onclick="showCreateCoachForm()">Create New Coach</button>
+                </div>
+                
+                <div id="create-coach-form" style="display: none;">
+                    <div class="admin-form">
+                        <h3>Create New Coach</h3>
+                        <form id="coachForm">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Coach Name *</label>
+                                <input type="text" class="admin-form-input" id="coachName" required placeholder="Enter coach name (required)">
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Email</label>
+                                <input type="email" class="admin-form-input" id="coachEmail" placeholder="Enter email (optional)">
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Phone</label>
+                                <input type="tel" class="admin-form-input" id="coachPhone" placeholder="Enter phone number (optional)">
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Specialization</label>
+                                <input type="text" class="admin-form-input" id="coachSpecialization" placeholder="Enter specialization (e.g., Yoga, HIIT, Personal Training, etc.)">
+                                <small style="color: #888; font-size: 0.8rem; margin-top: 0.5rem; display: block;">
+                                    Enter any sport or fitness specialization. Leave empty for N/A.
+                                </small>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Bio</label>
+                                <textarea class="admin-form-input" id="coachBio" rows="3" placeholder="Enter coach biography (optional)"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Experience (years)</label>
+                                <input type="number" class="admin-form-input" id="coachExperience" min="0" placeholder="Enter years of experience (optional)">
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Coach Image</label>
+                                <div class="file-upload-container">
+                                    <input type="file" class="file-upload-input" id="coachImageFile" accept="image/*">
+                                    <label for="coachImageFile" class="file-upload-label" id="coachImageLabel">
+                                        📁 Click to upload image or drag & drop here
+                                        <br><small>Supports: JPG, PNG, GIF (Max 5MB)</small>
+                                    </label>
+                                </div>
+                                <div id="coachImagePreview" class="image-preview-container" style="display: none;">
+                                    <img id="coachImagePreviewImg" class="image-preview" alt="Coach Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeCoachImage()">×</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="admin-btn admin-btn-create">Create Coach</button>
+                            <button type="button" class="admin-btn admin-btn-delete" onclick="hideCreateCoachForm()">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Specialization</th>
+                            <th>Experience</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="coaches-table-body">
+                        <!-- Coaches will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Management -->
+        <div id="users-section" class="admin-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Users Management</h2>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Join Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Promotions Management -->
+        <div id="promotions-section" class="admin-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Promotions Management</h2>
+                    <button class="admin-btn admin-btn-create" onclick="refreshPopularCourses()">🔄 Refresh Popular Courses</button>
+                </div>
+
+                <!-- Current Popular Promotion -->
+                <div id="current-promotion" style="margin-bottom: 2rem;">
+                    <h3 style="color: var(--color-neon-green); margin-bottom: 1rem;">🔥 Current Popular Courses</h3>
+                    <div id="current-promotion-content">
+                        <p style="text-align: center; color: #888;">Loading current promotion...</p>
+                    </div>
+                </div>
+
+                <!-- Promotions History -->
+                <div>
+                    <h3 style="color: var(--color-neon-green); margin-bottom: 1rem;">📊 Promotions History</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Courses</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Views</th>
+                                <th>Enrollments</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promotions-table-body">
+                            <!-- Promotions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Course Modal -->
+    <div id="editCourseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCourseModal()">&times;</span>
+            <h3>Edit Course</h3>
+            <form id="editCourseForm">
+                <input type="hidden" id="editCourseId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Course Name</label>
+                    <input type="text" class="admin-form-input" id="editCourseName" required>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Course Type</label>
+                    <select class="admin-form-input" id="editCourseType" required>
+                        <option value="yoga">Yoga</option>
+                        <option value="hiit">HIIT</option>
+                        <option value="pilates">Pilates</option>
+                        <option value="zumba">Zumba</option>
+                        <option value="bodyweight">Bodyweight</option>
+                        <option value="cardio">Cardio</option>
+                        <option value="circuittraining">Circuit Training</option>
+                        <option value="cardiokickboxing">Cardio Kickboxing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Description</label>
+                    <textarea class="admin-form-input" id="editCourseDescription" rows="3"></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Coach</label>
+                    <select class="admin-form-input" id="editCourseCoach" required>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Course Schedules</label>
+                    <div id="edit-schedules-container" class="schedule-container">
+                        <!-- Schedules will be populated here -->
+                    </div>
+                    <button type="button" class="add-schedule-btn" onclick="addEditSchedule()">+ Add Another Schedule</button>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Max Participants</label>
+                    <input type="number" class="admin-form-input" id="editMaxParticipants" min="1" required>
+                </div>
+                <div class="modal-form-buttons">
+                    <button type="submit" class="admin-btn admin-btn-create">Update Course</button>
+                    <button type="button" class="admin-btn admin-btn-delete" onclick="closeEditCourseModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Coach Modal -->
+    <div id="editCoachModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCoachModal()">&times;</span>
+            <h3>Edit Coach</h3>
+            <form id="editCoachForm">
+                <input type="hidden" id="editCoachId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Coach Name *</label>
+                    <input type="text" class="admin-form-input" id="editCoachName" required placeholder="Enter coach name (required)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Email</label>
+                    <input type="email" class="admin-form-input" id="editCoachEmail" placeholder="Enter email (optional)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Phone</label>
+                    <input type="tel" class="admin-form-input" id="editCoachPhone" placeholder="Enter phone number (optional)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Specialization</label>
+                    <input type="text" class="admin-form-input" id="editCoachSpecialization" placeholder="Enter specialization (e.g., Yoga, HIIT, Personal Training, etc.)">
+                    <small style="color: #888; font-size: 0.8rem; margin-top: 0.5rem; display: block;">
+                        Enter any sport or fitness specialization. Leave empty for N/A.
+                    </small>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Bio</label>
+                    <textarea class="admin-form-input" id="editCoachBio" rows="3" placeholder="Enter coach biography (optional)"></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Experience (years)</label>
+                    <input type="number" class="admin-form-input" id="editCoachExperience" min="0" placeholder="Enter years of experience (optional)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Coach Image</label>
+                    <div class="file-upload-container">
+                        <input type="file" class="file-upload-input" id="editCoachImageFile" accept="image/*">
+                        <label for="editCoachImageFile" class="file-upload-label" id="editCoachImageLabel">
+                            📁 Click to upload new image or drag & drop here
+                            <br><small>Supports: JPG, PNG, GIF (Max 5MB)</small>
+                        </label>
+                    </div>
+                    <div id="editCoachImagePreview" class="image-preview-container" style="display: none;">
+                        <img id="editCoachImagePreviewImg" class="image-preview" alt="Coach Preview">
+                        <button type="button" class="remove-image-btn" onclick="removeEditCoachImage()">×</button>
+                    </div>
+                </div>
+                <div class="modal-form-buttons">
+                    <button type="submit" class="admin-btn admin-btn-create">Update Coach</button>
+                    <button type="button" class="admin-btn admin-btn-delete" onclick="closeEditCoachModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            <h3>Change User Password</h3>
+            <form id="changePasswordForm">
+                <input type="hidden" id="changePasswordUserId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Username</label>
+                    <input type="text" class="admin-form-input" id="changePasswordUsername" readonly>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">New Password</label>
+                    <input type="password" class="admin-form-input" id="newPassword" required minlength="6">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Confirm New Password</label>
+                    <input type="password" class="admin-form-input" id="confirmPassword" required minlength="6">
+                </div>
+                <div class="modal-form-buttons">
+                    <button type="submit" class="admin-btn admin-btn-create">Change Password</button>
+                    <button type="button" class="admin-btn admin-btn-delete" onclick="closeChangePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Course Modal -->
+    <div id="editCourseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCourseModal()">&times;</span>
+            <h3>Edit Course</h3>
+            <form id="editCourseForm">
+                <input type="hidden" id="editCourseId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Course Name</label>
+                    <input type="text" class="admin-form-input" id="editCourseName" required>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Course Type</label>
+                    <select class="admin-form-input" id="editCourseType" required>
+                        <option value="yoga">Yoga</option>
+                        <option value="hiit">HIIT</option>
+                        <option value="pilates">Pilates</option>
+                        <option value="zumba">Zumba</option>
+                        <option value="bodyweight">Bodyweight</option>
+                        <option value="cardio">Cardio</option>
+                        <option value="circuittraining">Circuit Training</option>
+                        <option value="cardiokickboxing">Cardio Kickboxing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Description</label>
+                    <textarea class="admin-form-input" id="editCourseDescription" rows="3"></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Coach</label>
+                    <select class="admin-form-input" id="editCourseCoach" required>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Course Schedules</label>
+                    <div id="edit-schedules-container" class="schedule-container">
+                        <!-- Schedules will be populated here -->
+                    </div>
+                    <button type="button" class="add-schedule-btn" onclick="addEditSchedule()">+ Add Another Schedule</button>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Max Participants</label>
+                    <input type="number" class="admin-form-input" id="editMaxParticipants" min="1" required>
+                </div>
+                <div class="modal-form-buttons">
+                    <button type="submit" class="admin-btn admin-btn-create">Update Course</button>
+                    <button type="button" class="admin-btn admin-btn-delete" onclick="closeEditCourseModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Coach Modal -->
+    <div id="editCoachModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCoachModal()">&times;</span>
+            <h3>Edit Coach</h3>
+            <form id="editCoachForm">
+                <input type="hidden" id="editCoachId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Coach Name *</label>
+                    <input type="text" class="admin-form-input" id="editCoachName" required placeholder="Enter coach name (required)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Email</label>
+                    <input type="email" class="admin-form-input" id="editCoachEmail" placeholder="Enter email (optional)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Phone</label>
+                    <input type="tel" class="admin-form-input" id="editCoachPhone" placeholder="Enter phone number (optional)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Specialization</label>
+                    <input type="text" class="admin-form-input" id="editCoachSpecialization" placeholder="Enter specialization (e.g., Yoga, HIIT, Personal Training, etc.)">
+                    <small style="color: #888; font-size: 0.8rem; margin-top: 0.5rem; display: block;">
+                        Enter any sport or fitness specialization. Leave empty for N/A.
+                    </small>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Bio</label>
+                    <textarea class="admin-form-input" id="editCoachBio" rows="3" placeholder="Enter coach biography (optional)"></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Experience (years)</label>
+                    <input type="number" class="admin-form-input" id="editCoachExperience" min="0" placeholder="Enter years of experience (optional)">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Coach Image</label>
+                    <div class="file-upload-container">
+                        <input type="file" class="file-upload-input" id="editCoachImageFile" accept="image/*">
+                        <label for="editCoachImageFile" class="file-upload-label" id="editCoachImageLabel">
+                            📁 Click to upload new image or drag & drop here
+                            <br><small>Supports: JPG, PNG, GIF (Max 5MB)</small>
+                        </label>
+                    </div>
+                    <div id="editCoachImagePreview" class="image-preview-container" style="display: none;">
+                        <img id="editCoachImagePreviewImg" class="image-preview" alt="Coach Preview">
+                        <button type="button" class="remove-image-btn" onclick="removeEditCoachImage()">×</button>
+                    </div>
+                </div>
+                <div class="modal-form-buttons">
+                    <button type="submit" class="admin-btn admin-btn-create">Update Coach</button>
+                    <button type="button" class="admin-btn admin-btn-delete" onclick="closeEditCoachModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            <h3>Change User Password</h3>
+            <form id="changePasswordForm">
+                <input type="hidden" id="changePasswordUserId">
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Username</label>
+                    <input type="text" class="admin-form-input" id="changePasswordUsername" readonly>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">New Password</label>
+                    <input type="password" class="admin-form-input" id="newPassword" required minlength="6">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Confirm New Password</label>
+                    <input type="password" class="admin-form-input" id="confirmPassword" required minlength="6">
+                </div>
+                <div class="modal-form-buttons">
+                    <button type="submit" class="admin-btn admin-btn-create">Change Password</button>
+                    <button type="button" class="admin-btn admin-btn-delete" onclick="closeChangePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allCourses = [];
+        let allCoaches = [];
+        let allUsers = [];
+        let scheduleCounter = 0;
+        let editScheduleCounter = 0;
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAdminData();
+            setupFileUploadHandlers();
+        });
+
+        // Setup file upload drag and drop handlers
+        function setupFileUploadHandlers() {
+            setupFileUpload('coachImageFile', 'coachImageLabel', 'coachImagePreview', 'coachImagePreviewImg');
+            setupFileUpload('editCoachImageFile', 'editCoachImageLabel', 'editCoachImagePreview', 'editCoachImagePreviewImg');
+        }
+
+        function setupFileUpload(inputId, labelId, previewId, imgId) {
+            const fileInput = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            const preview = document.getElementById(previewId);
+            const img = document.getElementById(imgId);
+
+            // File input change handler
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(e.target.files[0], preview, img);
+            });
+
+            // Drag and drop handlers
+            label.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                label.classList.add('dragover');
+            });
+
+            label.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                label.classList.remove('dragover');
+            });
+
+            label.addEventListener('drop', function(e) {
+                e.preventDefault();
+                label.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect(files[0], preview, img);
+                }
+            });
+        }
+
+        function handleFileSelect(file, preview, img) {
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file (JPG, PNG, GIF)');
+                return;
+            }
+
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                return;
+            }
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeCoachImage() {
+            document.getElementById('coachImageFile').value = '';
+            document.getElementById('coachImagePreview').style.display = 'none';
+        }
+
+        function removeEditCoachImage() {
+            document.getElementById('editCoachImageFile').value = '';
+            document.getElementById('editCoachImagePreview').style.display = 'none';
+        }
+
+        // Schedule management functions
+        function addSchedule() {
+            scheduleCounter++;
+            const container = document.getElementById('schedules-container');
+            
+            // Get the last schedule's values to duplicate
+            const lastScheduleItem = container.querySelector('.schedule-item:last-child');
+            let lastStartTime = '';
+            let lastEndTime = '';
+            
+            if (lastScheduleItem) {
+                const startTimeInput = lastScheduleItem.querySelector('.schedule-start-time');
+                const endTimeInput = lastScheduleItem.querySelector('.schedule-end-time');
+                lastStartTime = startTimeInput ? startTimeInput.value : '';
+                lastEndTime = endTimeInput ? endTimeInput.value : '';
+            }
+            
+            const scheduleItem = document.createElement('div');
+            scheduleItem.className = 'schedule-item';
+            scheduleItem.setAttribute('data-schedule-index', scheduleCounter);
+            
+            scheduleItem.innerHTML = `
+                <div>
+                    <label class="admin-form-label">Day</label>
+                    <select class="admin-form-input schedule-day" required>
+                        <option value="">Select Day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="admin-form-label">Start Time</label>
+                    <input type="time" class="admin-form-input schedule-start-time" value="${lastStartTime}" required>
+                </div>
+                <div>
+                    <label class="admin-form-label">End Time</label>
+                    <input type="time" class="admin-form-input schedule-end-time" value="${lastEndTime}" required>
+                </div>
+                <button type="button" class="remove-schedule-btn" onclick="removeSchedule(${scheduleCounter})">Remove</button>
+            `;
+            
+            container.appendChild(scheduleItem);
+            updateRemoveButtons();
+        }
+
+        function removeSchedule(index) {
+            const scheduleItem = document.querySelector(`[data-schedule-index="${index}"]`);
+            if (scheduleItem) {
+                scheduleItem.remove();
+                updateRemoveButtons();
+            }
+        }
+
+        function updateRemoveButtons() {
+            const scheduleItems = document.querySelectorAll('#schedules-container .schedule-item');
+            scheduleItems.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-schedule-btn');
+                if (scheduleItems.length > 1) {
+                    removeBtn.style.display = 'block';
+                } else {
+                    removeBtn.style.display = 'none';
+                }
+            });
+        }
+
+        function addEditSchedule() {
+            editScheduleCounter++;
+            const container = document.getElementById('edit-schedules-container');
+            
+            // Get the last schedule's values to duplicate
+            const lastScheduleItem = container.querySelector('.schedule-item:last-child');
+            let lastStartTime = '';
+            let lastEndTime = '';
+            
+            if (lastScheduleItem) {
+                const startTimeInput = lastScheduleItem.querySelector('.edit-schedule-start-time');
+                const endTimeInput = lastScheduleItem.querySelector('.edit-schedule-end-time');
+                lastStartTime = startTimeInput ? startTimeInput.value : '';
+                lastEndTime = endTimeInput ? endTimeInput.value : '';
+            }
+            
+            const scheduleItem = document.createElement('div');
+            scheduleItem.className = 'schedule-item';
+            scheduleItem.setAttribute('data-schedule-index', editScheduleCounter);
+            
+            scheduleItem.innerHTML = `
+                <div>
+                    <label class="admin-form-label">Day</label>
+                    <select class="admin-form-input edit-schedule-day" required>
+                        <option value="">Select Day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="admin-form-label">Start Time</label>
+                    <input type="time" class="admin-form-input edit-schedule-start-time" value="${lastStartTime}" required>
+                </div>
+                <div>
+                    <label class="admin-form-label">End Time</label>
+                    <input type="time" class="admin-form-input edit-schedule-end-time" value="${lastEndTime}" required>
+                </div>
+                <button type="button" class="remove-schedule-btn" onclick="removeEditSchedule(${editScheduleCounter})">Remove</button>
+            `;
+            
+            container.appendChild(scheduleItem);
+            updateEditRemoveButtons();
+        }
+
+        function removeEditSchedule(index) {
+            const scheduleItem = document.querySelector(`#edit-schedules-container [data-schedule-index="${index}"]`);
+            if (scheduleItem) {
+                scheduleItem.remove();
+                updateEditRemoveButtons();
+            }
+        }
+
+        function updateEditRemoveButtons() {
+            const scheduleItems = document.querySelectorAll('#edit-schedules-container .schedule-item');
+            scheduleItems.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-schedule-btn');
+                if (scheduleItems.length > 1) {
+                    removeBtn.style.display = 'block';
+                } else {
+                    removeBtn.style.display = 'none';
+                }
+            });
+        }
+
+        // Collect schedule data from form
+        function collectScheduleData(containerSelector) {
+            const schedules = [];
+            const scheduleItems = document.querySelectorAll(`${containerSelector} .schedule-item`);
+            
+            scheduleItems.forEach(item => {
+                const day = item.querySelector('.schedule-day, .edit-schedule-day').value;
+                const startTime = item.querySelector('.schedule-start-time, .edit-schedule-start-time').value;
+                const endTime = item.querySelector('.schedule-end-time, .edit-schedule-end-time').value;
+                
+                if (day && startTime && endTime) {
+                    schedules.push({ day, startTime, endTime });
+                }
+            });
+            
+            return schedules;
+        }
+
+        // Navigation functions
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.admin-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.admin-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(section + '-section').classList.add('active');
+            
+            // Add active class to clicked nav item
+            event.target.classList.add('active');
+            
+            // Load data for the selected section
+            switch(section) {
+                case 'courses':
+                    loadCourses();
+                    break;
+                case 'coaches':
+                    loadCoaches();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'promotions':
+                    loadPromotions();
+                    break;
+            }
+        }
+
+        // Load all admin data
+        async function loadAdminData() {
+            await Promise.all([
+                loadCourses(),
+                loadCoaches(),
+                loadUsers(),
+                loadStats()
+            ]);
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const [coursesRes, coachesRes, usersRes, enrollmentsRes] = await Promise.all([
+                    fetch('/api/admin/courses'),
+                    fetch('/api/admin/coaches'),
+                    fetch('/api/admin/users'),
+                    fetch('/api/admin/enrollments')
+                ]);
+
+                const [coursesData, coachesData, usersData, enrollmentsData] = await Promise.all([
+                    coursesRes.json(),
+                    coachesRes.json(),
+                    usersRes.json(),
+                    enrollmentsRes.json()
+                ]);
+
+                document.getElementById('totalCoursesCount').textContent = coursesData.courses?.length || 0;
+                document.getElementById('totalCoachesCount').textContent = coachesData.coaches?.length || 0;
+                document.getElementById('totalUsersCount').textContent = usersData.users?.length || 0;
+                document.getElementById('totalEnrollmentsCount').textContent = enrollmentsData.enrollments?.length || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Courses Management
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/admin/courses');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allCourses = data.courses;
+                    displayCourses(allCourses);
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+            }
+        }
+
+        function displayCourses(courses) {
+            const tbody = document.getElementById('courses-table-body');
+            tbody.innerHTML = courses.map(course => {
+                // Handle both old single schedule and new multiple schedules format
+                let scheduleDisplay = '';
+                if (course.schedules && Array.isArray(course.schedules) && course.schedules.length > 0) {
+                    scheduleDisplay = course.schedules.map(s => `${s.day || 'No Day'} ${s.startTime || '--:--'}-${s.endTime || '--:--'}`).join('<br>');
+                } else if (course.schedule && course.schedule.day) {
+                    scheduleDisplay = `${course.schedule.day} ${course.schedule.startTime || '--:--'}-${course.schedule.endTime || '--:--'}`;
+                } else {
+                    scheduleDisplay = 'No schedule set';
+                }
+                
+                return `
+                    <tr>
+                        <td>${course.name || 'Unnamed Course'}</td>
+                        <td>${course.type || 'No Type'}</td>
+                        <td>${course.coach?.name || 'No Coach'}</td>
+                        <td>${scheduleDisplay}</td>
+                        <td>${course.currentParticipants || 0}/${course.maxParticipants || 0}</td>
+                        <td>${course.status || 'unknown'}</td>
+                        <td>
+                            <button class="admin-btn admin-btn-edit" onclick="editCourse('${course._id}')">Edit</button>
+                            <button class="admin-btn admin-btn-delete" onclick="deleteCourse('${course._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function showCreateCourseForm() {
+            document.getElementById('create-course-form').style.display = 'block';
+            loadCoachesForSelect('courseCoach');
+        }
+
+        function hideCreateCourseForm() {
+            document.getElementById('create-course-form').style.display = 'none';
+            document.getElementById('courseForm').reset();
+        }
+
+        async function loadCoachesForSelect(selectId) {
+            try {
+                const response = await fetch('/api/admin/coaches');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">Select Coach</option>' + 
+                        data.coaches.map(coach => `<option value="${coach._id}">${coach.name}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading coaches for select:', error);
+            }
+        }
+
+        document.getElementById('courseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const schedules = collectScheduleData('#schedules-container');
+            
+            if (schedules.length === 0) {
+                alert('Please add at least one schedule');
+                return;
+            }
+            
+            const courseData = {
+                name: document.getElementById('courseName').value,
+                type: document.getElementById('courseType').value,
+                description: document.getElementById('courseDescription').value,
+                coach: document.getElementById('courseCoach').value,
+                schedules: schedules, // Changed from single schedule to multiple schedules
+                maxParticipants: parseInt(document.getElementById('maxParticipants').value),
+                currentParticipants: 0,
+                status: 'active'
+            };
+
+            try {
+                const response = await fetch('/api/admin/courses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(courseData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Course created successfully!');
+                    hideCreateCourseForm();
+                    loadCourses();
+                    loadStats();
+                } else {
+                    alert('Error creating course: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error creating course:', error);
+                alert('Error creating course');
+            }
+        });
+
+        function editCourse(courseId) {
+            const course = allCourses.find(c => c._id === courseId);
+            if (!course) return;
+
+            document.getElementById('editCourseId').value = course._id;
+            document.getElementById('editCourseName').value = course.name;
+            document.getElementById('editCourseType').value = course.type;
+            document.getElementById('editCourseDescription').value = course.description || '';
+            document.getElementById('editCourseCoach').value = course.coach?._id || '';
+            document.getElementById('editMaxParticipants').value = course.maxParticipants;
+
+            // Clear existing schedules
+            const container = document.getElementById('edit-schedules-container');
+            container.innerHTML = '';
+            editScheduleCounter = 0;
+
+            // Add existing schedules
+            const schedules = course.schedules || (course.schedule ? [course.schedule] : []);
+            if (schedules.length === 0) {
+                // Add empty schedule if none exist
+                schedules.push({ day: '', startTime: '', endTime: '' });
+            }
+
+            schedules.forEach((schedule, index) => {
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = 'schedule-item';
+                scheduleItem.setAttribute('data-schedule-index', index);
+                
+                scheduleItem.innerHTML = `
+                    <div>
+                        <label class="admin-form-label">Day</label>
+                        <select class="admin-form-input edit-schedule-day" required>
+                            <option value="">Select Day</option>
+                            <option value="Monday" ${schedule.day === 'Monday' ? 'selected' : ''}>Monday</option>
+                            <option value="Tuesday" ${schedule.day === 'Tuesday' ? 'selected' : ''}>Tuesday</option>
+                            <option value="Wednesday" ${schedule.day === 'Wednesday' ? 'selected' : ''}>Wednesday</option>
+                            <option value="Thursday" ${schedule.day === 'Thursday' ? 'selected' : ''}>Thursday</option>
+                            <option value="Friday" ${schedule.day === 'Friday' ? 'selected' : ''}>Friday</option>
+                            <option value="Saturday" ${schedule.day === 'Saturday' ? 'selected' : ''}>Saturday</option>
+                            <option value="Sunday" ${schedule.day === 'Sunday' ? 'selected' : ''}>Sunday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="admin-form-label">Start Time</label>
+                        <input type="time" class="admin-form-input edit-schedule-start-time" value="${schedule.startTime || ''}" required>
+                    </div>
+                    <div>
+                        <label class="admin-form-label">End Time</label>
+                        <input type="time" class="admin-form-input edit-schedule-end-time" value="${schedule.endTime || ''}" required>
+                    </div>
+                    <button type="button" class="remove-schedule-btn" onclick="removeEditSchedule(${index})" ${schedules.length === 1 ? 'style="display: none;"' : ''}>Remove</button>
+                `;
+                
+                container.appendChild(scheduleItem);
+                editScheduleCounter = Math.max(editScheduleCounter, index);
+            });
+
+            loadCoachesForSelect('editCourseCoach');
+            document.getElementById('editCourseModal').style.display = 'block';
+        }
+
+        function closeEditCourseModal() {
+            document.getElementById('editCourseModal').style.display = 'none';
+        }
+
+        document.getElementById('editCourseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const schedules = collectScheduleData('#edit-schedules-container');
+            
+            if (schedules.length === 0) {
+                alert('Please add at least one schedule');
+                return;
+            }
+            
+            const courseId = document.getElementById('editCourseId').value;
+            const courseData = {
+                name: document.getElementById('editCourseName').value,
+                type: document.getElementById('editCourseType').value,
+                description: document.getElementById('editCourseDescription').value,
+                coach: document.getElementById('editCourseCoach').value,
+                schedules: schedules,
+                maxParticipants: parseInt(document.getElementById('editMaxParticipants').value)
+            };
+
+            try {
+                const response = await fetch(`/api/admin/courses/${courseId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(courseData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Course updated successfully!');
+                    closeEditCourseModal();
+                    loadCourses();
+                } else {
+                    alert('Error updating course: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error updating course:', error);
+                alert('Error updating course');
+            }
+        });
+
+        async function deleteCourse(courseId) {
+            if (!confirm('Are you sure you want to delete this course?')) return;
+
+            try {
+                const response = await fetch(`/api/admin/courses/${courseId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Course deleted successfully!');
+                    loadCourses();
+                    loadStats();
+                } else {
+                    alert('Error deleting course: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting course:', error);
+                alert('Error deleting course');
+            }
+        }
+
+        // Coaches Management
+        async function loadCoaches() {
+            try {
+                const response = await fetch('/api/admin/coaches');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allCoaches = data.coaches;
+                    displayCoaches(allCoaches);
+                }
+            } catch (error) {
+                console.error('Error loading coaches:', error);
+            }
+        }
+
+        function displayCoaches(coaches) {
+            const tbody = document.getElementById('coaches-table-body');
+            tbody.innerHTML = coaches.map(coach => `
+                <tr>
+                    <td>${coach.name}</td>
+                    <td>${coach.email}</td>
+                    <td>${coach.phone || 'N/A'}</td>
+                    <td>${coach.specialization}</td>
+                    <td>${coach.experience || 0} years</td>
+                    <td>${coach.status}</td>
+                    <td>
+                        <button class="admin-btn admin-btn-edit" onclick="editCoach('${coach._id}')">Edit</button>
+                        <button class="admin-btn admin-btn-delete" onclick="deleteCoach('${coach._id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showCreateCoachForm() {
+            document.getElementById('create-coach-form').style.display = 'block';
+        }
+
+        function hideCreateCoachForm() {
+            document.getElementById('create-coach-form').style.display = 'none';
+            document.getElementById('coachForm').reset();
+        }
+
+        document.getElementById('coachForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate required fields
+            const coachName = document.getElementById('coachName').value.trim();
+            if (!coachName) {
+                alert('Coach name is required and cannot be empty!');
+                return;
+            }
+            
+            if (coachName.toLowerCase() === 'n/a') {
+                alert('Coach name cannot be "N/A". Please enter a valid name.');
+                return;
+            }
+            
+            let imageData = 'N/A';
+            const fileInput = document.getElementById('coachImageFile');
+            
+            // Handle image upload
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                imageData = await fileToBase64(file);
+            }
+            
+            // Get form values with N/A defaults for optional fields
+            const email = document.getElementById('coachEmail').value.trim() || 'N/A';
+            const phone = document.getElementById('coachPhone').value.trim() || 'N/A';
+            const specialization = document.getElementById('coachSpecialization').value.trim() || 'N/A';
+            const bio = document.getElementById('coachBio').value.trim() || 'N/A';
+            const experience = document.getElementById('coachExperience').value;
+            
+            const coachData = {
+                name: coachName,
+                email: email,
+                phone: phone,
+                specialization: specialization,
+                bio: bio,
+                experience: experience ? parseInt(experience) : 0,
+                image: imageData,
+                status: 'active'
+            };
+
+            try {
+                const response = await fetch('/api/admin/coaches', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(coachData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Coach created successfully!');
+                    hideCreateCoachForm();
+                    loadCoaches();
+                    loadStats();
+                } else {
+                    alert('Error creating coach: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error creating coach:', error);
+                alert('Error creating coach');
+            }
+        });
+
+        // Helper function to convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function editCoach(coachId) {
+            const coach = allCoaches.find(c => c._id === coachId);
+            if (!coach) return;
+
+            document.getElementById('editCoachId').value = coach._id;
+            document.getElementById('editCoachName').value = coach.name;
+            
+            // Handle N/A values - show empty fields instead of "N/A"
+            document.getElementById('editCoachEmail').value = coach.email === 'N/A' ? '' : (coach.email || '');
+            document.getElementById('editCoachPhone').value = coach.phone === 'N/A' ? '' : (coach.phone || '');
+            document.getElementById('editCoachSpecialization').value = coach.specialization === 'N/A' ? '' : (coach.specialization || '');
+            document.getElementById('editCoachBio').value = coach.bio === 'N/A' ? '' : (coach.bio || '');
+            document.getElementById('editCoachExperience').value = coach.experience || '';
+
+            // Show existing image if available and not N/A
+            if (coach.image && coach.image !== 'N/A') {
+                const preview = document.getElementById('editCoachImagePreview');
+                const img = document.getElementById('editCoachImagePreviewImg');
+                img.src = coach.image;
+                preview.style.display = 'block';
+            } else {
+                document.getElementById('editCoachImagePreview').style.display = 'none';
+            }
+
+            document.getElementById('editCoachModal').style.display = 'block';
+        }
+
+        function closeEditCoachModal() {
+            document.getElementById('editCoachModal').style.display = 'none';
+        }
+
+        document.getElementById('editCoachForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate required fields
+            const coachName = document.getElementById('editCoachName').value.trim();
+            if (!coachName) {
+                alert('Coach name is required and cannot be empty!');
+                return;
+            }
+            
+            if (coachName.toLowerCase() === 'n/a') {
+                alert('Coach name cannot be "N/A". Please enter a valid name.');
+                return;
+            }
+            
+            let imageData = '';
+            const fileInput = document.getElementById('editCoachImageFile');
+            
+            // Handle image upload
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                imageData = await fileToBase64(file);
+            } else {
+                // Keep existing image if no new one provided
+                const existingCoach = allCoaches.find(c => c._id === document.getElementById('editCoachId').value);
+                imageData = existingCoach?.image || 'N/A';
+            }
+            
+            // Get form values with N/A defaults for optional fields
+            const email = document.getElementById('editCoachEmail').value.trim() || 'N/A';
+            const phone = document.getElementById('editCoachPhone').value.trim() || 'N/A';
+            const specialization = document.getElementById('editCoachSpecialization').value.trim() || 'N/A';
+            const bio = document.getElementById('editCoachBio').value.trim() || 'N/A';
+            const experience = document.getElementById('editCoachExperience').value;
+            
+            const coachId = document.getElementById('editCoachId').value;
+            const coachData = {
+                name: coachName,
+                email: email,
+                phone: phone,
+                specialization: specialization,
+                bio: bio,
+                experience: experience ? parseInt(experience) : 0,
+                image: imageData
+            };
+
+            try {
+                const response = await fetch(`/api/admin/coaches/${coachId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(coachData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Coach updated successfully!');
+                    closeEditCoachModal();
+                    loadCoaches();
+                } else {
+                    alert('Error updating coach: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error updating coach:', error);
+                alert('Error updating coach');
+            }
+        });
+
+        async function deleteCoach(coachId) {
+            if (!confirm('Are you sure you want to delete this coach?')) return;
+
+            try {
+                const response = await fetch(`/api/admin/coaches/${coachId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Coach deleted successfully!');
+                    loadCoaches();
+                    loadStats();
+                } else {
+                    alert('Error deleting coach: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting coach:', error);
+                alert('Error deleting coach');
+            }
+        }
+
+        // Users Management
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allUsers = data.users;
+                    displayUsers(allUsers);
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${new Date(user.joinDate).toLocaleDateString()}</td>
+                    <td>
+                        <button class="admin-btn admin-btn-edit" onclick="changeUserPassword('${user._id}', '${user.username}')">Change Password</button>
+                        <button class="admin-btn admin-btn-delete" onclick="deleteUser('${user._id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function changeUserPassword(userId, username) {
+            document.getElementById('changePasswordUserId').value = userId;
+            document.getElementById('changePasswordUsername').value = username;
+            document.getElementById('changePasswordModal').style.display = 'block';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            const userId = document.getElementById('changePasswordUserId').value;
+
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newPassword })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Password changed successfully!');
+                    closeChangePasswordModal();
+                } else {
+                    alert('Error changing password: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                alert('Error changing password');
+            }
+        });
+
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user? This will also delete all their workouts and enrollments.')) return;
+
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('User deleted successfully!');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    alert('Error deleting user: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user');
+            }
+        }
+
+        // Promotions Management
+        async function loadPromotions() {
+            try {
+                // Load current promotion
+                const currentResponse = await fetch('/api/promotions/popular');
+                const currentData = await currentResponse.json();
+                
+                if (currentData.success && currentData.promotion) {
+                    displayCurrentPromotion(currentData.promotion);
+                } else {
+                    document.getElementById('current-promotion-content').innerHTML = `
+                        <div style="text-align: center; padding: 2rem; background: rgba(255, 193, 7, 0.1); border-radius: 8px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            <p style="color: #ffc107; margin-bottom: 1rem;">⚠️ No active popular courses promotion</p>
+                            <button class="admin-btn admin-btn-create" onclick="refreshPopularCourses()">Create New Promotion</button>
+                        </div>
+                    `;
+                }
+                
+                // Load promotions history
+                const historyResponse = await fetch('/api/promotions');
+                const historyData = await historyResponse.json();
+                
+                if (historyData.success) {
+                    displayPromotionsHistory(historyData.promotions);
+                }
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+                document.getElementById('current-promotion-content').innerHTML = `
+                    <div style="text-align: center; color: red;">
+                        Error loading promotions: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayCurrentPromotion(promotion) {
+            const endDate = new Date(promotion.endDate);
+            const now = new Date();
+            const timeLeft = endDate - now;
+            
+            let timeLeftDisplay = '';
+            if (timeLeft > 0) {
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                timeLeftDisplay = `${days}d ${hours}h remaining`;
+            } else {
+                timeLeftDisplay = 'Expired';
+            }
+            
+            document.getElementById('current-promotion-content').innerHTML = `
+                <div style="background: rgba(0, 255, 127, 0.1); border: 1px solid rgba(0, 255, 127, 0.3); border-radius: 8px; padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div>
+                            <strong style="color: var(--color-neon-green);">Active Promotion</strong>
+                            <div style="color: #888; font-size: 0.9rem;">Ends: ${endDate.toLocaleDateString()} (${timeLeftDisplay})</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: var(--color-neon-green); font-size: 1.2rem; font-weight: bold;">${promotion.views} views</div>
+                            <div style="color: #888; font-size: 0.9rem;">${promotion.enrollments} enrollments</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        ${promotion.courses.map(course => `
+                            <div style="background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 4px; border-left: 3px solid var(--color-neon-green);">
+                                <strong style="color: var(--color-neon-green);">${course.name}</strong>
+                                <div style="color: #888; font-size: 0.9rem; margin-top: 0.5rem;">
+                                    Coach: ${course.coach.name}<br>
+                                    Type: ${course.type}<br>
+                                    Participants: ${course.currentParticipants}/${course.maxParticipants}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayPromotionsHistory(promotions) {
+            const tbody = document.getElementById('promotions-table-body');
+            
+            if (promotions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #888; padding: 2rem;">
+                            No promotions history available
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = promotions.map(promotion => {
+                const startDate = new Date(promotion.startDate).toLocaleDateString();
+                const endDate = new Date(promotion.endDate).toLocaleDateString();
+                const courseNames = promotion.courses.map(c => c.name).join(', ');
+                
+                let statusBadge = '';
+                switch (promotion.status) {
+                    case 'active':
+                        statusBadge = '<span style="background: #10b981; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">Active</span>';
+                        break;
+                    case 'expired':
+                        statusBadge = '<span style="background: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">Expired</span>';
+                        break;
+                    case 'inactive':
+                        statusBadge = '<span style="background: #ef4444; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">Inactive</span>';
+                        break;
+                }
+                
+                return `
+                    <tr>
+                        <td>${promotion.type.toUpperCase()}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${courseNames}">${courseNames}</td>
+                        <td>${startDate}</td>
+                        <td>${endDate}</td>
+                        <td>${statusBadge}</td>
+                        <td>${promotion.views}</td>
+                        <td>${promotion.enrollments}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function refreshPopularCourses() {
+            if (!confirm('This will create a new popular courses promotion and expire the current one. Continue?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/promotions/popular/refresh', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('New popular courses promotion created successfully!');
+                    loadPromotions();
+                } else {
+                    alert('Error creating promotion: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error refreshing promotions:', error);
+                alert('Error creating new promotion');
+            }
+        }
+
+        // Modal close functions
+        function closeEditCourseModal() {
+            document.getElementById('editCourseModal').style.display = 'none';
+            // Reset scroll position
+            document.querySelector('#editCourseModal .modal-content').scrollTop = 0;
+        }
+
+        function closeEditCoachModal() {
+            document.getElementById('editCoachModal').style.display = 'none';
+            // Reset scroll position
+            document.querySelector('#editCoachModal .modal-content').scrollTop = 0;
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+            // Reset scroll position
+            document.querySelector('#changePasswordModal .modal-content').scrollTop = 0;
+        }
+
+        // Add click outside modal to close functionality
+        window.onclick = function(event) {
+            const modals = ['editCourseModal', 'editCoachModal', 'changePasswordModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    // Reset scroll position
+                    modal.querySelector('.modal-content').scrollTop = 0;
+                }
+            });
+        }
+
+        // Ensure modals are scrollable on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('touchmove', function(e) {
+                    e.stopPropagation();
+                }, { passive: true });
+            });
+        });
+    </script>
+</body>
+</html>
