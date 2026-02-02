@@ -1,11 +1,17 @@
 **Project Name**
 Server-Side Application --- **Fitness App: Workhard**
 https://workhard-b5zs.onrender.com/
+---
 Built in Node.js with Express.js framework
+---
 Using MVC structure
+---
 Tested by vm Linux os: ubuntu
+---
 Language used: HTML, CSS, Javascript
+---
 Database used: MongoDB
+---
 
 
 A fitness app that allows a logged-in user to manage their own workout, enroll in fitness courses.
