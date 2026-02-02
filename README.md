@@ -15,7 +15,11 @@ Database used: MongoDB
 
 
 A fitness app that allows a logged-in user to manage their own workout, enroll in fitness courses.
-An admin system managed the coaches, courses, promotions, users.
+An admin system managed 
+- the coaches
+- the courses
+- the promotions
+- the users
 
 ---
 
@@ -52,12 +56,12 @@ Contains two files
 - update.ejs: User can modify their record by the edit function
 
 **models**:  
-Coach
-Course
-Enrollment
-Promotion
-User
-Workout
+- Coach
+- Course
+- Enrollment
+- Promotion
+- User
+- Workout
 
 ---
 # Fitness App - API Curl Commands
