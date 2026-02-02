@@ -40,8 +40,8 @@ Contains two files
 
 **views**: 
 -admin_index.ejs: Display and summarize of the admin system
- -coach.ejs: Display all the coaches
- -courses.ejs: Display all the courses
+-coach.ejs: Display all the coaches
+-courses.ejs: Display all the courses
 -my-courses.ejs: Display enrolled courses schedule
 -create.ejs: A form for user to mark their workout record  
 -delete.ejs: Deletion that requires the user to confirm  
